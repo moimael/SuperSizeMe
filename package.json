@@ -1,0 +1,13 @@
+{
+  "name": "SuperSizeMe",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Mael Lavault",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.7.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.29.0"
+  }
+}
