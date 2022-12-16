@@ -13,7 +13,8 @@ const client = new Client({
 });
 
 client.on("message", (message) => {
-  if (message.content.startsWith("!size")) {
+  console.log(message);
+  if (message.content.startsWith("/size")) {
     const user = message.mentions.users.first();
     if (!user) return message.reply("Please mention a valid user.");
     if (user.height && user.weight) {
@@ -29,12 +30,13 @@ client.on("message", (message) => {
 });
 
 client.on("message", (message) => {
-  if (message.content.startsWith("!setheight")) {
+  console.log(message);
+  if (message.content.startsWith("/setheight")) {
     const height = message.content.split(" ")[1];
     message.author.setHeight(height);
     message.channel.send(`Your height has been set to ${height} cm.`);
   }
-  if (message.content.startsWith("!setweight")) {
+  if (message.content.startsWith("/setweight")) {
     const weight = message.content.split(" ")[1];
     message.author.setWeight(weight);
     message.channel.send(`Your weight has been set to ${weight} kg.`);
