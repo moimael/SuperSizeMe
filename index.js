@@ -1,3 +1,4 @@
+const keep_alive = require("./keep_alive.js");
 const { Client, GatewayIntentBits } = require("discord.js");
 
 const token = process.env["DISCORD_BOT_SECRET"];
