@@ -1,5 +1,7 @@
 const keep_alive = require("./keep_alive.js");
-const { Client, GatewayIntentBits } = require("discord.js");
+const { Client, Events, GatewayIntentBits } = require("discord.js");
+const Keyv = require("keyv");
+const keyv = new Keyv("sqlite://./db.sqlite");
 
 const token = process.env["DISCORD_BOT_SECRET"];
 
@@ -12,34 +14,47 @@ const client = new Client({
   ],
 });
 
-client.on("message", (message) => {
-  console.log(message);
-  if (message.content.startsWith("/size")) {
-    const user = message.mentions.users.first();
-    if (!user) return message.reply("Please mention a valid user.");
-    if (user.height && user.weight) {
-      message.channel.send(
-        `${user.username} is ${user.height} cm tall and weighs ${user.weight} kg.`
-      );
-    } else {
-      message.channel.send(
-        `${user.username} has not set their height and weight.`
-      );
-    }
-  }
-});
+client.on(Events.InteractionCreate, async (interaction) => {
+  try {
+    if (!interaction.isChatInputCommand()) return;
 
-client.on("message", (message) => {
-  console.log(message);
-  if (message.content.startsWith("/setheight")) {
-    const height = message.content.split(" ")[1];
-    message.author.setHeight(height);
-    message.channel.send(`Your height has been set to ${height} cm.`);
-  }
-  if (message.content.startsWith("/setweight")) {
-    const weight = message.content.split(" ")[1];
-    message.author.setWeight(weight);
-    message.channel.send(`Your weight has been set to ${weight} kg.`);
+    if (interaction.commandName === "size") {
+      const user = interaction.options.getUser("user");
+      if (!user) return interaction.reply("Please mention a valid user.");
+      const [height, weight] = (await keyv.get(user.id)) || [];
+      if (height && weight) {
+        return interaction.reply(
+          `${user.username} is ${height} cm tall and weighs ${weight} kg.`
+        );
+      } else {
+        return interaction.reply(
+          `${user.username} has not set their height and weight.`
+        );
+      }
+    }
+
+    if (interaction.commandName === "setweight") {
+      const newWeight = interaction.options.getInteger("weight");
+      const [height, _] = (await keyv.get(interaction.user.id)) || ["", ""];
+      await keyv.set(interaction.user.id, [height, newWeight]);
+      return interaction.reply({
+        content: `Your weight has been set to ${newWeight}kg.`,
+        ephemeral: true,
+      });
+    }
+
+    if (interaction.commandName === "setheight") {
+      const newHeight = interaction.options.getInteger("height");
+      const [_, weight] = (await keyv.get(interaction.user.id)) || ["", ""];
+      await keyv.set(interaction.user.id, [newHeight, weight]);
+
+      return interaction.reply({
+        content: `Your height has been set to ${newHeight}cm.`,
+        ephemeral: true,
+      });
+    }
+  } catch (e) {
+    console.log(e);
   }
 });
 
